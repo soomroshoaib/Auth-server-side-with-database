@@ -17,5 +17,5 @@ app.use(Coolieparser)
 const Port = process.env.PORT || 4000;
 
  app.listen(Port,()=>{
-    console.log(` localhost ${Port}`)
+    console.log(`http://localhost:${Port}`)
  })

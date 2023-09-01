@@ -1,0 +1,7 @@
+
+{
+    "version": 2,
+    "name": "server",
+    "builds": [{"src": "app.mjs", "use": "@vercel/node"}],
+    "routes": [{"src": "/(.*)", "dest": "/app.mjs"}]
+}

@@ -1,17 +1,21 @@
 import express, { json } from "express"
 import userdb from '../model/userSchema.mjs';
 import bcrypt from 'bcryptjs';
+import cookie from 'cookie-parser';
+import Authenticate from "../middleware/Authenticate.mjs";
+//import jwt from 'jsonwebtoken';
 
 const router = new express.Router()
 
-// user register data add database
+// user register data add database signup
+
 
 router.post('/register',async(req,res)=>{
     // console.log(req.body)
 
     const {fname, email, password, cpassword } = req.body;
 
-    if(!fname || !email|| !password|| !cpassword ){
+    if(!fname || !email || !password|| !cpassword ){
         res.status(422).json({error:'Please Fill All the details'})
     }
 
@@ -52,24 +56,47 @@ router.post("/login", async (req, res)=>{
           const userValid = await userdb.findOne({email:email});
 
           if(userValid){
-            const isMatch =  await bcrypt.compare(password,userValid,password)
+              const isMatch =  await bcrypt.compare(password, userValid.password)
 
             if(!isMatch){
                 res.status(422).json({error:'password is not matched'})
             }else{
                 /////token generate
                 const token = await userValid.generateAuthtoken()
-                console.log(token)
+                res.cookie("usercookie", token,{
+                    expires:new Date(Date.now()+9000000),
+                       httpOnly:true  
+                });
+                const result = {
+                    userValid,
+                    token
+
+                }
+                res.status(201).json({status:201, result})
             }
           }
 
     } catch (error){
 
+        res.status(201).json(error)
+        console.log("catch block error ")
+
     }
     
+})
+
+router.get("/validuser", Authenticate, async(req, res)=>{
+    try{
+        const validuserOne = await userdb.findOne({_id:req.userId}) ;
+    res.status(201).json({status:201, validuserOne});
+    } catch {
+        res.status(401).json({status:201, error});
+    }
 })
 
 
 
 
+
 export default router
+
